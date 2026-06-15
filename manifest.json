@@ -1,0 +1,10 @@
+{
+    "manifest_version": 3,
+    "name": "Startup Search",
+    "version": "1.0",
+    "description": "apa aja lah yang penting keren",
+    "chrome_url_overrides": {
+        "newtab": "index.html"
+    },
+    "permissions": []
+}

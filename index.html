@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIKKI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        #video-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        .search-container {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .engine-selector {
+            display: flex;
+            gap: 6px;
+        }
+
+        .engine-btn {
+            padding: 4px 12px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            background: rgba(0,0,0,0.4);
+            color: #fff;
+            font-size: 12px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: background 0.2s;
+        }
+
+        .engine-btn:hover,
+        .engine-btn.active {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 24px;
+            padding: 6px 14px;
+            width: 380px;
+            max-width: 90vw;
+        }
+
+        .search-bar input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #fff;
+            font-size: 14px;
+            padding: 4px 0;
+        }
+
+        .search-bar input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .search-bar button {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 2px 4px;
+        }
+
+        .search-bar button:hover {
+            color: #fff;
+        }
+
+        /* Favorites sidebar */
+        .fav-sidebar {
+            position: fixed;
+            top: 50%;
+            left: 16px;
+            transform: translateY(-50%);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            max-height: 70vh;
+        }
+
+        .fav-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow-y: auto;
+            max-height: 55vh;
+            width: 44px;
+            scrollbar-width: none;
+        }
+
+        .fav-list::-webkit-scrollbar { display: none; }
+
+        .fav-item {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            text-decoration: none;
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+            transition: background 0.2s;
+        }
+
+        .fav-item:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .fav-item .fav-delete {
+            display: none;
+            position: absolute;
+            top: 1px;
+            right: 2px;
+            font-size: 10px;
+            color: rgba(255,100,100,0.9);
+            cursor: pointer;
+            background: none;
+            border: none;
+            line-height: 1;
+        }
+
+        .fav-item:hover .fav-delete { display: block; }
+
+        .fav-add {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(10px);
+            border: 1px dashed rgba(255,255,255,0.3);
+            color: rgba(255,255,255,0.6);
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+
+        .fav-add:hover {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+        }
+
+        /* Add favorite modal */
+        .fav-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fav-modal-overlay.show { display: flex; }
+
+        .fav-modal {
+            background: rgba(20,20,30,0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 14px;
+            padding: 20px;
+            width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .fav-modal h3 {
+            color: #fff;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .fav-modal input {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .fav-modal input::placeholder { color: rgba(255,255,255,0.4); }
+
+        .fav-modal-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .fav-modal-actions button {
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .fav-modal-actions .btn-cancel {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        .fav-modal-actions .btn-save {
+            background: rgba(183, 0, 255, 0.7);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <video id="video-bg" autoplay muted loop playsinline>
+        <source src="video/startup.mp4" type="video/mp4">
+    </video>
+
+    <!-- Favorites sidebar -->
+    <div class="fav-sidebar">
+        <div class="fav-list" id="favList"></div>
+        <button class="fav-add" id="favAddBtn" title="Add favorite">+</button>
+    </div>
+
+    <!-- Add favorite modal -->
+    <div class="fav-modal-overlay" id="favModal">
+        <div class="fav-modal">
+            <h3>Add Favorite</h3>
+            <input type="text" id="favName" placeholder="Name (e.g. YouTube)">
+            <input type="text" id="favUrl" placeholder="URL (e.g. https://youtube.com)">
+            <div class="fav-modal-actions">
+                <button class="btn-cancel" id="favCancel">Cancel</button>
+                <button class="btn-save" id="favSave">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="search-container">
+        <div class="engine-selector">
+            <button class="engine-btn active" data-engine="google">Google</button>
+            <button class="engine-btn" data-engine="bing">Bing</button>
+            <button class="engine-btn" data-engine="duckduckgo">DuckDuckGo</button>
+            <button class="engine-btn" data-engine="yahoo">Yahoo</button>
+        </div>
+        <form class="search-bar" id="searchForm">
+            <input type="text" id="searchInput" placeholder="Search..." autocomplete="off" autofocus>
+            <button type="submit">&#128269;</button>
+        </form>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
